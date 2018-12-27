@@ -1,3 +1,5 @@
+package sample;
+
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -9,7 +11,7 @@ import lombok.ToString;
 @EqualsAndHashCode
 @ToString
 @AllArgsConstructor
-public class IssueCmd {
+public class IssuedEvt {
     private final String id;
     private final Integer amount;
 }

@@ -1,10 +1,14 @@
+package sample;
+
 import org.axonframework.eventhandling.EventHandler;
 import org.axonframework.queryhandling.QueryHandler;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
+@Component
 public class CardSummaryProjection {
 
     private final List<CardSummary> cardSummaries = new CopyOnWriteArrayList<>();

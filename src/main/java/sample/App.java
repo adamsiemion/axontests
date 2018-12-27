@@ -1,33 +1,46 @@
+package sample;
+
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.config.Configuration;
 import org.axonframework.config.DefaultConfigurer;
 import org.axonframework.config.EventHandlingConfiguration;
 import org.axonframework.eventsourcing.eventstore.EmbeddedEventStore;
+import org.axonframework.eventsourcing.eventstore.EventStorageEngine;
 import org.axonframework.eventsourcing.eventstore.inmemory.InMemoryEventStorageEngine;
 import org.axonframework.queryhandling.QueryGateway;
 import org.axonframework.queryhandling.responsetypes.ResponseTypes;
+import org.axonframework.spring.config.EnableAxon;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.SpringBootConfiguration;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 
 import java.util.concurrent.ExecutionException;
 
-public class App {
+@SpringBootApplication
+@EnableAxon
+public class App implements CommandLineRunner {
 
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
-        CardSummaryProjection projection = new CardSummaryProjection();
-        EventHandlingConfiguration eventHandlingConfiguration = new EventHandlingConfiguration();
-        eventHandlingConfiguration.registerEventHandler(c -> projection);
+    @Autowired
+    private CommandGateway commandGateway;
 
-        Configuration configuration = DefaultConfigurer.defaultConfiguration()
-                .configureAggregate(GiftCard.class) // (1)
-                .configureEventStore(c -> new EmbeddedEventStore(new InMemoryEventStorageEngine())) //(2)
-                .registerModule(eventHandlingConfiguration) // (3)
-                .registerQueryHandler(c -> projection) // (4)
-                .buildConfiguration(); // (5)
+    @Autowired
+    private QueryGateway queryGateway;
 
-        configuration.start();
+    @Bean
+    public EventStorageEngine eventStorageEngine() {
+        return new InMemoryEventStorageEngine();
+    }
 
-        CommandGateway commandGateway = configuration.commandGateway();
-        QueryGateway queryGateway = configuration.queryGateway();
 
+    public static void main(String[] args) {
+        SpringApplication.run(App.class, args);
+    }
+
+    @Override
+    public void run(String... args) throws Exception {
         commandGateway.sendAndWait(new IssueCmd("gc1", 100));
         commandGateway.sendAndWait(new IssueCmd("gc2", 50));
         commandGateway.sendAndWait(new RedeemCmd("gc1", 10));
